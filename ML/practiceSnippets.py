@@ -69,3 +69,23 @@ plt.show()
 
 
 #%%
+
+#When missing values in column
+# ways to dorp columns and include specific data type columns
+# melb_predictors = data.drop(['Price'], axis=1)
+# X = melb_predictors.select_dtypes(exclude=['object'])
+
+
+
+# Way to impute, or get avg of a column to replace missing value in column
+# from sklearn.impute import SimpleImputer 
+
+# # Imputation  
+# my_imputer = SimpleImputer()
+# imputed_X_train = pd.DataFrame(my_imputer.fit_transform(X_train))
+# imputed_X_valid = pd.DataFrame(my_imputer.transform(X_valid))
+
+
+#imputaiton may remove some columns though, so put them back....?
+
+
