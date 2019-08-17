@@ -1,7 +1,0 @@
-name: Eric Wang
-markdown: kramdown
-permalink: /blog/:year/:month/:day/:title
-timezone: Asia/Shanghai
-future:true
-
-#Build Settings
