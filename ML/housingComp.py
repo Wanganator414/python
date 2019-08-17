@@ -41,6 +41,7 @@ dummyTrain = trainData.fillna(0, inplace=False)
 X = dummyTrain[trainFeatures]
 y = dummyTrain.SalePrice  # SalePrice only in train set
 
+#Remember to remove SalePrice column once Y is set, since you dont need it to predict prices
 
 # Split test data into train and val sets to test for best leaf node amount
 # NOTE: train_size = 0.x and test_size=0.x are options to size the split sets
