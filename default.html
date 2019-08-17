@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>{{ page.title }}</title>
+    <!-- link to main stylesheet -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
+    
+    <!-- plug ins go here  see _include directory for catalog -->
+</head>
+
+<body>
+
+    <nav>
+        <ul>
+            <li><a href="/"><img id="faviconImage" src="/assets/images/android-chrome-512x512.png" width="50px" title="Eric Wang"><a> </li>
+            <li><a href="/">Home</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/cv">CV</a></li>
+            <li><a href="/blog">Blog</a></li>
+        </ul>
+        <hr class="hDivider">
+    </nav>
+    <div class="container">
+
+        {{ content }}
+
+    </div><!-- /.container -->
+    <footer>
+        <ul>
+            <li><a href="mailto:ewang414@gmail.com"><img id="emailIcon" alt="Email" src="/assets/images/email.png"
+                        title="Email"></a></li>
+            <li><a href="https://github.com/wanganator414" target="_blank"> <img id="githubIcon" alt="GitHub Link"
+                        src="/assets/images/GitHub32px.png" width="15px" title="GitHub"></a></li>
+            <li><a href="https://www.linkedin.com/in/eric-wang-341289157/" target="_blank"> <img id="linkedInIcon" alt="LinkedIn Link"
+                        src="/assets/images/linkedIn.jpg" width="15px" title="LinkdIn"></a></li>
+        </ul>
+    </footer>
+</body>
+
+</html>
