@@ -4,4 +4,4 @@ from pdf2image.exceptions import (
     PDFPageCountError,
     PDFSyntaxError
 )
-images = convert_from_path('C:\Users\ericw\Desktop\Images\git_cheat_sheet.pdf')
+images = convert_from_path('\Users\ericw\Desktop\Images\git_cheat_sheet.pdf')
