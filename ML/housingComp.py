@@ -103,3 +103,4 @@ output.to_csv(os.path.join(savePath, r'finalOutput.csv'), index=False)
 print(output.head)
 
 #%%
+#Use imputation and encoding to better organize the info
