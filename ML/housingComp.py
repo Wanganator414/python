@@ -1,5 +1,6 @@
 # %% [markdown]
-#Setup Code 
+#`Setup Code` 
+
 #Core libs
 import pandas as pd
 import os
@@ -23,7 +24,7 @@ from sklearn.metrics import mean_absolute_error
 import warnings
 
 # %% [markdown]
-# **Train Model**
+# `Train Model`
 #Ignore random future warning crap
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -36,15 +37,15 @@ testData = pd.read_csv(testDataPath)
 
 # Get list of non object type columns
 # filteredDtypes = trainData.loc[:, trainData.dtypes != "object"]
+# OR use newDF = df.select_dtype(include=[""] or exclude=[""])
 # print(filteredDtypes.dtypes)
 savePath = "python/data/housePriceComp1"
 # filteredDtypes.dtypes.to_csv(os.path.join(savePath, r'filteredFeatures.csv'))
 
-trainFeatures = ["OverallQual","OverallCond","LotArea", "Fireplaces", "PoolArea",
- "YearBuilt", "TotRmsAbvGrd", "YearRemodAdd", "TotalBsmtSF", "MasVnrArea",
- "1stFlrSF","2ndFlrSF","FullBath","HalfBath","BedroomAbvGr","GarageCars",
- "GarageArea","ScreenPorch", "MiscVal", "MoSold", "YrSold", "OpenPorchSF",
-"GrLivArea","3SsnPorch","KitchenAbvGr","GarageYrBlt","WoodDeckSF"]
+trainData.columns.nunique()
+#%%
+y=trainData.SalePrice;
+X=9;
 
 # filter data for null values and replace them with some value
 dummyTrain = trainData.fillna(0, inplace=False)
@@ -98,7 +99,7 @@ finalModel.fit(X, y)
 
 
 # %% [markdown]
-# **Test Model**
+# `Test Model`
 # Reassign X for test set
 dummyTest = testData.fillna(0, inplace=False)
 testFeatures = trainFeatures
