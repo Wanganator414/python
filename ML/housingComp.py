@@ -1,18 +1,32 @@
 # %% [markdown]
 #Setup Code 
+#Core libs
 import pandas as pd
 import os
 import numpy as np
-from sklearn.metrics import mean_absolute_error
+
+#Supporting libs for cleaning and organising data
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import LabelEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+
+#Model imports
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import ExtraTreesRegressor
+
+#Accuracy checking and warnings
+from sklearn.metrics import mean_absolute_error
 import warnings
 
 # %% [markdown]
 # **Train Model**
+#Ignore random future warning crap
 warnings.simplefilter(action='ignore', category=FutureWarning)
+
 # file setup and cleaning
 trainDataPath = "python\data\housePriceComp1\\train.csv"
 trainData = pd.read_csv(trainDataPath)
