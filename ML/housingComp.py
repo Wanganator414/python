@@ -7,8 +7,7 @@ import numpy as np
 
 # Supporting libs for cleaning and organising data
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
@@ -33,7 +32,7 @@ trainData = pd.read_csv(trainDataPath)
 testDataPath = "ML\\data\housePriceComp1\\test.csv"
 testData = pd.read_csv(testDataPath)
 
-savePath = "python/data/housePriceComp1"
+savePath = "ML\data\housePriceComp1"
 # filteredDtypes.dtypes.to_csv(os.path.join(savePath, r'filteredFeatures.csv'))
 
 # %% [markdown]
@@ -41,7 +40,7 @@ savePath = "python/data/housePriceComp1"
 
 # Placeholder incase of polluting data
 trainDataBeta = trainData
-
+testDataBeta = testData
 # trainDataBeta.SalePrice.dropna(axis=0,inplace=True);
 
 # Get master Target and Prediction feature setup
@@ -55,8 +54,7 @@ X_train_full, X_valid_full, y_train, y_valid = train_test_split(
 )
 
 
-# SEPARATE numerical with categorical data
-
+# SEPARATE numerical with categorical data in sliced train/validation dataframes
 numCols = X_train_full.select_dtypes(exclude=["object"])
 objCols = X_train_full.select_dtypes(include=["object"])
 
@@ -81,35 +79,61 @@ X_valid = X_valid_full[totalCols].copy()
 # nanCols = trainDataBeta.columns.isnull()
 
 # Preprocessing for numerical data
-numerical_transformer = SimpleImputer(strategy='constant')
+numerical_transformer = SimpleImputer(strategy="mean")
 
 # Preprocessing for categorical data
-categorical_transformer = Pipeline(steps=[
-    ('imputer', SimpleImputer(strategy='most_frequent')),
-    ('onehot', OneHotEncoder(handle_unknown='ignore'))  
-])
+categorical_transformer = Pipeline(
+    steps=[
+        ("imputer", SimpleImputer(strategy="most_frequent")),
+        ("onehot", OneHotEncoder(handle_unknown="ignore")),
+    ]
+)
 
-#Finishing pipelining tomorrow ....yawn Zzzzzz
+# Bundle preprocessing for numerical and categorical data
+preprocessor = ColumnTransformer(
+    transformers=[
+        ("num", numerical_transformer, list(numCols)),
+        ("cat", categorical_transformer, list(objCols)),
+    ]
+)
+
+# Set up ML model (may need additional fine tuning next time)
+model = ExtraTreesRegressor(n_estimators=155, random_state=1)
+
+# Set up pipeline to run all previous steps in one line
+my_pipe = Pipeline(steps=[("preprocessor", preprocessor), ("model", model)])
+
+# Call the magical one liner to fit ML model to processed data
+my_pipe.fit(X_train, y_train)
+
+# Predict processed validation data using fitted model
+preds = my_pipe.predict(X_valid)
+
+# Check MAE using validation data
+score = mean_absolute_error(y_valid, preds)
+print(f"MAE: {score}")
+
+
+#%% [markdown] ==================================================================
+# Fit test info and get final predictions
+finalPredicts=my_pipe.predict(testDataBeta)
+
+
+# %% [markdown]
+# `Test Model`
+# Reassign X for test set
+
+# Make sure to use TESTING data id, NOT TRAINING data id, since test has less row than train
+output = pd.DataFrame({"Id": testDataBeta.Id, "SalePrice": finalPredicts})
+output.to_csv(os.path.join(savePath, r"finalOutput.csv"), index=False)
+
+
 #%%
+print(output.head)
 
-# filter data for null values and replace them with some value
-# dummyTrain = trainData.fillna(0, inplace=False)
-# print(dummyTrain.isnull().sum())
-# print(trainData.isnull().sum())
-
-# orginal untouched X and y features from train data
-X = dummyTrain[trainFeatures]
-y = dummyTrain.SalePrice  # SalePrice only in train set
-
+#%%
+# Old mode structure, keep as ref
 # Remember to remove SalePrice column once Y is set, since you dont need it to predict prices
-
-# Split test data into train and val sets to test for best leaf node amount
-# NOTE: train_size = 0.x and test_size=0.x are options to size the split sets
-# Many more parameters to tune
-train_X, val_X, train_y, val_y = train_test_split(X, y, random_state=1)
-
-initialModel = ExtraTreesRegressor(random_state=1)
-initialModel.fit(train_X, train_y)
 
 # Test optimal leaf max for model
 
@@ -144,25 +168,4 @@ print(f"Optimal Max Leaf: {optimalLeaf}\nMae: {min(maeDict.values())}")
 # Retrain on full training data set and prep for final test dataset
 finalModel = ExtraTreesRegressor(max_leaf_nodes=optimalLeaf[0], random_state=1)
 finalModel.fit(X, y)
-
-
-# %% [markdown]
-# `Test Model`
-# Reassign X for test set
-dummyTest = testData.fillna(0, inplace=False)
-testFeatures = trainFeatures
-X2 = dummyTest[testFeatures]
-
-finalPredicts = finalModel.predict(X2)
-
-# Make sure to use TESTING data id, NOT TRAINING data id, since test has less row than train
-output = pd.DataFrame({"Id": dummyTest.Id, "SalePrice": finalPredicts})
-output.to_csv(os.path.join(savePath, r"finalOutput.csv"), index=False)
-
-
-#%%
-print(output.head)
-
-#%%
-# Use imputation and encoding to better organize the info
 
