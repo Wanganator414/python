@@ -1,0 +1,1 @@
+cat  C:\Users\ericw\Desktop\Programming\python\Other\d3Source.txt | tr -d "\n\r" > C:\Users\ericw\Desktop\Programming\python\Other\d3Formatted.txt
