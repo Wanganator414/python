@@ -60,15 +60,17 @@ X_train_full, X_valid_full, y_train, y_valid = train_test_split(
 # # SEPARATE numerical with categorical data in sliced train/validation dataframes
 # numCols = X_train_full.select_dtypes(exclude=["object"])
 # objCols = X_train_full.select_dtypes(include=["object"])
-numCols = [col for col in X_train_full if X_train_full[col].dtype in [
-    "int64", "float"]]
+numCols = [col for col in X_train_full if X_train_full[col].dtype in ["int64", "float"]]
 
 # PRUNE string columns for cardinality, aka amount of unique values in said column
 # High cardinality columns are pretty bad for One Hot encoding, may be candidates for label encoding though
 cardThresh = 10
 allObjs = list(X_train_full.select_dtypes(include=["object"]))
-objCols = [col for col in X_train_full
-           if X_train_full[col].dtype == "object" and X_train_full[col].nunique() < cardThresh]
+objCols = [
+    col
+    for col in X_train_full
+    if X_train_full[col].dtype == "object" and X_train_full[col].nunique() < cardThresh
+]
 
 # Check how many high cardinality features were dropped
 print(f"{len(allObjs)-len(objCols)}")
@@ -112,7 +114,9 @@ preprocessor = ColumnTransformer(
 )
 
 # Set up ML model (may need additional fine tuning next time)
-model = XGBRegressor(random_state=1, n_estimators=1000,early_stopping_rounds=6, learning_rate=0.05)
+model = XGBRegressor(
+    random_state=1, n_estimators=1000, early_stopping_rounds=6, learning_rate=0.05
+)
 
 # Set up pipeline to run all previous steps in one line
 my_pipe = Pipeline(steps=[("preprocessor", preprocessor), ("model", model)])
@@ -124,7 +128,9 @@ my_pipe.fit(X_train, y_train)
 preds = my_pipe.predict(X_valid)
 
 # Check MAE using validation data
-score = -1 * cross_val_score(my_pipe, X_train, y_train,cv=5,scoring='neg_mean_absolute_error')
+score = -1 * cross_val_score(
+    my_pipe, X_train, y_train, cv=5, scoring="neg_mean_absolute_error"
+)
 
 print(f"MAE: {score.mean()}")
 
