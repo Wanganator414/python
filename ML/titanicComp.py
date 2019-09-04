@@ -80,21 +80,22 @@ def editFare(df_In):
     """
     meanClassfare = df_In.pivot_table("Fare", index="Pclass", aggfunc="mean")
     meanClassfare = list(meanClassfare["Fare"])
-    for x in range(len(df_In["Fare"])):
-        if df_In["Fare"][x] == 0:
+    # for x in range(len(df_In["Fare"])):
+    for x in df_In.index:
+        if df_In.Fare[x] == 0:
             if df_In["Pclass"][x] == "1":
-                df_In["Fare"][x] = meanClassfare[0]
+                df_In.Fare[x] = meanClassfare[0]
             if df_In["Pclass"][x] == "2":
-                df_In["Fare"][x] = meanClassfare[1]
+                df_In.Fare[x] = meanClassfare[1]
             else:
-                df_In["Fare"][x] = meanClassfare[2]
+                df_In.Fare[x] = meanClassfare[2]
     # print(meanClassfare)
     print("Replaced /$0 fares with mean fare of social class")
     # print(df_In["Fare"].apply(lambda x: df_In["Pclass"][x] in meanClassfare))
 
 
 # editFare()
-trainX.describe()
+# trainX.describe()
 
 
 #%% [markdown]
@@ -120,15 +121,19 @@ categorical_transformer = Pipeline(
 preprocessor = ColumnTransformer(
     transformers=[
         ("num", numerical_transformer, ["Age"]),
-        ("cat", categorical_transformer,["Cabin", "Embarked"]),
+        ("cat", categorical_transformer, ["Cabin", "Embarked"]),
     ]
 )
+
+
 #%%
-model = XGBClassifier(random_state=1, learning_rate=0.1, n_estimators=150)
+model = XGBClassifier(random_state=1, learning_rate=0.05, n_estimators=100)
+editFare(trainX)
+editFare(validX)
 my_pipe = Pipeline(steps=[("preprocess", preprocessor), ("model", model)])
 model2 = my_pipe.fit(trainX, trainY)
 my_pipe.fit(trainX, trainY)
-preds=my_pipe.predict(validX)
+preds = my_pipe.predict(validX)
 score = -1 * cross_val_score(
     my_pipe, trainX, trainY, cv=5, scoring="neg_mean_absolute_error"
 )
@@ -144,7 +149,8 @@ plt.show()
 #%%
 # %% [markdown] ==================================================================
 # Fit test info and get final predictions
-testData=testDataFull
+testData = testDataFull
+editFare(testData)
 finalPredicts = my_pipe.predict(testData)
 
 output = pd.DataFrame({"PassengerId": testData.PassengerId, "Survived": finalPredicts})
