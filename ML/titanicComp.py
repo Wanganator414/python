@@ -189,6 +189,8 @@ def assignCabin(i):
 #%% [markdown]
 # But before we call the function, recall that there was a missing fare value in the Test dataset as well as a bunch of passengers having $0 as their "Fare" values, as seen here:
 len(all_data.query("Fare==0"))
+
+#%%[markdown]
 #Let's look at the missing Fare value in detail.
 all_data[all_data.Fare.isnull()]
 
@@ -200,6 +202,30 @@ storneyFare = all_data[(all_data.Sex=="male") & (all_data.Embarked=="S") & (all_
 all_data.Fare.fillna(storneyFare,inplace=True)
 
 
+#%%[markdown]
+
+#Now, with all those folks recorded as having $0 fare, what do we do with them?
+#<br/><br/>
+#We can use the same approach as we did with Mr.Storey, but before that, we must take care of the 2 passengers missing "Embarked" values real quick.
+all_data[all_data.Embarked.isnull()]
+
+#%% [markdown]
+
+#Let's look at other passengers with similar features as these two
+
+sns.set_style('darkgrid')
+fig, ax = plt.subplots(figsize=(9,5),ncols=2)
+ax1 = sns.boxplot(x="Embarked", y="Fare", hue="Pclass", data=all_data, ax = ax[0]);
+ax2 = sns.boxplot(x="Embarked", y="Fare", hue="Pclass", data=xTest, ax = ax[1]);
+ax1.set_title("FULL Set", fontsize = 18)
+ax2.set_title('Test Set',  fontsize = 18)
+
+fig.show()
+# all_data[(all_data.Sex=="female")&(all_data.Pclass==1)&(all_data.Cabin=="B")]
+
+#%% [markdown]
+#We can see that, for Pclass=1 and fare~80, most passengers boarded the Titanic at port C. Let's fill "C" in for those 2 passengers.
+all_data.Embarked.fillna("C",inplace=true);
 #%% [markdown]
 #Now we run the cabin assignment function on the N cabins
 
