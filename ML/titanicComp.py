@@ -1,6 +1,6 @@
 #%% [markdown]
 
-### This kernel serves as practice documenting a supervised ML learning process without scrableing everything.
+### This kernel serves as practice documenting a supervised ML learning process without scrabling everything.
 # ---
 
 
@@ -29,6 +29,7 @@ from xgboost import XGBClassifier
 import seaborn as sns
 from xgboost import plot_importance
 import matplotlib.pyplot as plt
+%matplotlib inline
 
 # Accuracy checking and warnings
 from sklearn.metrics import mean_absolute_error, classification_report, accuracy_score
@@ -214,18 +215,17 @@ all_data[all_data.Embarked.isnull()]
 #Let's look at other passengers with similar features as these two
 
 sns.set_style('darkgrid')
-fig, ax = plt.subplots(figsize=(9,5),ncols=2)
-ax1 = sns.boxplot(x="Embarked", y="Fare", hue="Pclass", data=all_data, ax = ax[0]);
-ax2 = sns.boxplot(x="Embarked", y="Fare", hue="Pclass", data=xTest, ax = ax[1]);
-ax1.set_title("FULL Set", fontsize = 18)
-ax2.set_title('Test Set',  fontsize = 18)
+fig = plt.subplots(figsize=(7,5))
+# plt.figure(figsize=(14,6))
+ax1 = sns.boxplot(x="Embarked", y="Fare", hue="Pclass", data=all_data);
+ax1.set_title("Full Data", fontsize = 18)
+# plt.xlabel("DATE")
 
-fig.show()
 # all_data[(all_data.Sex=="female")&(all_data.Pclass==1)&(all_data.Cabin=="B")]
 
 #%% [markdown]
 #We can see that, for Pclass=1 and fare~80, most passengers boarded the Titanic at port C. Let's fill "C" in for those 2 passengers.
-all_data.Embarked.fillna("C",inplace=true);
+all_data.Embarked.fillna("C",inplace=True);
 #%% [markdown]
 #Now we run the cabin assignment function on the N cabins
 
@@ -239,47 +239,60 @@ cabins_NoN=cabins_NoN.Cabin
 
 #Combine the refactored cabin data and replace original
 all_data.Cabin = pd.concat([cabins_N,cabins_NoN],ignore_index=True)
-#%%
-#<br/><br/>
-#Recall that we are missing 2 embarked values, let us fix that first.
-#<br/><br/>
-
-#Two NaN passengers are both class 1, in cabin B, and have Fare $80, so technically should be same embarkation port
-all_data[all_data.Embarked.isna()]
+all_data[all_data.Cabin=="N"]
+#%% [markdown]
+# Now there are no more "N" cabins now, since they are reorganized into exsisting Cabins.
 
 #%%[markdown]
-# The minimun value for Fare seems to be 0, which is weird. We will go check in detail why that is the case.
+# Now we can take care of passengers having $0 for their fares, by taking the mean Fare of other passengers with similar attributes.
+missingFareDF = all_data[all_data.Fare==0.0]
+#! Don't forget to run cells twice if some values do not update. ^
+# missingFareDF.reset_index(inplace=True)
+def fareCalc():
+    for i in missingFareDF.PassengerId:
+        valueRow=all_data[(all_data.PassengerId==i)]
+        #Remember the index for later reference
+        valueRowIndices = valueRow.index
+        print("Index =",valueRowIndices)
+        #Reset indices to avoid messy indexes
+        valueRow.reset_index(inplace=True)
+        nFare=valueRow.Fare[0]
+        if nFare < 1:
+            nSex=valueRow.Sex[0]
+            nEmbarked=valueRow.Embarked[0]
+            nPclass=valueRow.Pclass[0]
+            # print(f"Sex:{nSex},Embarked:{nEmbarked},Pclass:{nPclass}")
+            newFareVal=all_data[(all_data.Sex==nSex) & (all_data.Embarked==nEmbarked) & (all_data.Pclass==nPclass)].Fare.mean()
+            # print(f"New fare will be:{newFareVal}")
+            # print(f"{valueRow}")
+            # print(f"Old value {nFare} will be altered to: {newFareVal}")
+            #! NOTE when using loc or iloc, they do NOT alter the original data, only returns a copy, add "df." in front of operation.
+            #! Also, iloc returns one index extra vs loc..I think.
+            #all_data.Fare[valueRowIndices] = newFareVal
+            all_data.at[valueRowIndices,"Fare"] = newFareVal
+    print("Fares calculated and reassigned.")
+
+fareCalc()
 
 #%% [markdown]
 
-def editFare(df_In):
-    """
-    Takes df_In, type dataframe and edits the dataframe["Fare"] in place based on passenger social class
-    """
-    # meanClassfare = df_In.pivot_table("Fare", index="Pclass", aggfunc="mean")
-    # meanClassfare = list(meanClassfare["Fare"])
-    # for x in range(len(df_In["Fare"])):
-    # for x in df_In.index:
-    #     if df_In.Fare[x] == 0:
-    #         if df_In["Pclass"][x] == "1":
-    #             df_In.Fare[x] = meanClassfare[0]
-    #         if df_In["Pclass"][x] == "2":
-    #             df_In.Fare[x] = meanClassfare[1]
-    #         else:
-    #             df_In.Fare[x] = meanClassfare[2]
-    # # print(meanClassfare)
+#Now that the Fare,Cabin, and Embarked features are taken care of, lets have a look at the last feature with missing values: Age
+missingVals(all_data)
 
-    for x in df_In.index:
-        if df_In.Fare[x]==0:
-    
-    print("Replaced /$0 fares with mean fare of social class")
-    # print(df_In["Fare"].apply(lambda x: df_In["Pclass"][x] in meanClassfare))
+#%%
+#Check min age value
+all_data.Age.min()
+#%% [markdown]
+#The missing age values account for around 20% of all combined data, we have to do something about it.
+#<br/><br/>
+#Since there are no passengers with 0 as Age, we don't need to worry about weird values and cna focus on estimating the Age of passengers by referencing their Sex,Sibling Count, and Parent/Child counts.
 
 
-# editFare()
-# X.describe()
 
+#%% [markdown]
 
+#Check correlation of values to survival rate after done with data cleaning and feat. engineering
+correlationRates=pd.DataFrame(abs(trainDataFull.corr()['Survived']).sort_values(ascending = False))
 #%% [markdown]
 # #Pipelines start here
 numCols = [col for col in X if X[col].dtype in ["int64", "float"]]
