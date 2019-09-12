@@ -278,21 +278,18 @@ fareCalc()
 
 #Now that the Fare,Cabin, and Embarked features are taken care of, lets have a look at the last feature with missing values: Age
 missingVals(all_data)
-
-#%%
-#Check min age value
-all_data.Age.min()
 #%% [markdown]
 #The missing age values account for around 20% of all combined data, we have to do something about it.
 #<br/><br/>
-#Since there are no passengers with 0 as Age, we don't need to worry about weird values and cna focus on estimating the Age of passengers by referencing their Sex,Sibling Count, and Parent/Child counts.
+#We currently do not have a good way of estimating th missing ages, we cannot use a mean of median of a particular group, this will be too general and since age is an important determinant to one's survival, we will employ a mini machine learning model to gauge the missing ages.
+
 
 
 
 #%% [markdown]
-
 #Check correlation of values to survival rate after done with data cleaning and feat. engineering
-correlationRates=pd.DataFrame(abs(trainDataFull.corr()['Survived']).sort_values(ascending = False))
+correlationRates=pd.DataFrame((trainDataFull.corr()['Survived']).sort_values(ascending = False))
+
 #%% [markdown]
 # #Pipelines start here
 numCols = [col for col in X if X[col].dtype in ["int64", "float"]]
